@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 
 from auxiliar_indexing_functions import clean_date
+from auxiliar_indexing_functions import text_extraction
 
 load_dotenv()
 
@@ -46,15 +47,10 @@ class Search:
                 tree = html.fromstring(f.read())
 
                 titolo = tree.xpath("//title/text()")
-                abstract = tree.xpath("//section[@class='abstract']//descendant::*")
+                abstract = tree.xpath("//section[@class='abstract']/p")
                 data = tree.xpath("//div[@class='display-inline-block']/following-sibling::text()[1]")
                 autori = tree.xpath("//meta[@name='citation_author']/@content")
-                paragraphs = tree.xpath(
-                    "//section[@aria-label='Article content']"
-                    "//descendant::*"
-                    "[not(self::table or self::figure or ancestor::section[contains(@class,'abstract')])]"
-                )
-
+                testo = text_extraction(tree)
                 
                 titolo = titolo[0].strip() if titolo else ""
                 # Rimuove eventuale "-PMC" finale
@@ -62,7 +58,6 @@ class Search:
                     titolo = titolo.rsplit("- PMC", 1)[0].strip()
 
                 abstract = [p.text_content().strip() for p in abstract if p.text_content().strip()]
-                testo = "\n\n".join(" ".join(p.itertext()).strip()for p in paragraphs)
                 data = clean_date(" ".join(d.strip() for d in data if d.strip()))
 
                 documents.append({

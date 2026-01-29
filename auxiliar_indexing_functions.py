@@ -33,7 +33,25 @@ def clean_abstract(abstract):
     # Rimuove la parola "Abstract" all'inizio
     return re.sub(r'^\s*Abstract\s*', '', abstract, flags=re.IGNORECASE)
 
+def text_extraction(tree):
+    parts = []
 
+    nodes = tree.xpath(
+        "//section[@aria-label='Article content']//*[self::h2 or self::p]"
+        "[not(ancestor::section[contains(@class,'abstract')])]"
+    )
+
+    for n in nodes:
+        text = n.text_content().strip()
+        if text:
+            if n.tag == "h2":
+                # Wrappa in <h3> per titolo evidenziato
+                parts.append(f"<h3>{text}</h3>")
+            else:
+                # Paragrafo normale, senza grassetto
+                parts.append(f"<p>{text}</p>")
+
+    return "\n".join(parts)
 
 
 
