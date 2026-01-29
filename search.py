@@ -46,15 +46,15 @@ class Search:
                 tree = html.fromstring(f.read())
 
                 titolo = tree.xpath("//title/text()")
-                abstract = tree.xpath("//section[@class='abstract']/p")
+                abstract = tree.xpath("//section[@class='abstract']//descendant::*")
                 data = tree.xpath("//div[@class='display-inline-block']/following-sibling::text()[1]")
                 autori = tree.xpath("//meta[@name='citation_author']/@content")
                 paragraphs = tree.xpath(
                     "//section[@aria-label='Article content']"
-                    "//p[not(ancestor::section[contains(@class,'abstract')])"
-                    " and not(ancestor::table)"
-                    " and not(ancestor::figure)]"
+                    "//descendant::*"
+                    "[not(self::table or self::figure or ancestor::section[contains(@class,'abstract')])]"
                 )
+
                 
                 titolo = titolo[0].strip() if titolo else ""
                 # Rimuove eventuale "-PMC" finale

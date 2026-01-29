@@ -1,0 +1,29 @@
+===== Python =====
+venv/
+pycache/
+*.py[cod]
+
+===== Flask =====
+instance/
+*.log
+
+===== Elasticsearch / Docker =====
+esdata/
+docker-data/
+*.lock
+
+===== Corpus / documenti =====
+articoli_html/
+
+===== OS / editor =====
+.DS_Store
+.vscode/
+.idea/
+
+===== Misc =====
+.env
+﻿
+Fabry
+fabry2k
+ 
+ 
