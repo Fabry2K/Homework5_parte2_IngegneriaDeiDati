@@ -58,65 +58,53 @@ def text_extraction(tree):
 ####################
 ######tabelle#######
 ####################
+def estrazione_paper_id(tree):
+
+    # Estrae il testo che contiene "PMCID:"
+    text = tree.xpath("//div/text()[contains(., 'PMCID:')]")[0].strip()
+
+    # Estrae solo il PMCID
+    pmcid = text.split("PMCID:")[1].split()[0]  # primo token dopo "PMCID:"
+
+    return pmcid
+
+
+
 def estrazione_context_paragraphs(tree, keywords):
 
     STOP_WORDS = set(ENGLISH_STOP_WORDS)
     context_paragraphs = []
 
-    section = tree.xpath("//section[@class='ltx_section']")
-    appendix = tree.xpath("//section[@class='ltx_appendix']")
+    sections = tree.xpath("//section[.//h2[contains(@class,'pmc_sec_title')]]"
+                            "[not(.//section[contains(@class,'abstract')])]")
 
     keywords = {k.lower() for k in keywords if k.lower() not in STOP_WORDS}
 
-    #fisso un minimo di match per evitare falsi positivi
-    min_matches = max(1, len(keywords) // 9)
+    for s in sections:
 
-    for s in section:
+        min_matches = max(1, len(keywords) // 9)
 
-        #prima analisi della sezione
-        section_title = " ".join(s.xpath("./*[starts-with(name(), 'h')]//text()")).strip()
-        section_text = " ".join(s.xpath("./*[not(self::section)]//text()")).lower()
+        title = s.xpath("./h2")
+        text = s.xpath(".//p")
 
-        #tokenizzo le parole nel paragrafo (eliminando così i duplicati)
-        section_tokens = set(re.findall(r"\b[a-zA-Z0-9\-]+\b", section_text))
+        section_title = title[0].text_content().strip() if title else ""
+        section_text = " ".join(
+            t.text_content().strip()
+            for t in text
+            if t.text_content().strip()
+        )
+
+        section_tokens = {
+            w.lower()
+            for w in re.findall(r"\b[a-zA-Z0-9\-]+\b", section_text)
+        }
 
         matched = keywords & section_tokens
-
         if len(matched)>=min_matches:
             context_paragraphs.append(section_title)
-        
-       
-       #ora si analizzano i paragrafi di sezione (se ci sono)
-        paragraphs = s.xpath("./section")
-
-        if paragraphs:
-            for p in paragraphs:
-                paragraph_title = " ".join(p.xpath("./*[starts-with(name(), 'h')]//text()")).strip()
-                paragraph_text = " ".join(p.xpath(".//text()")).lower()
-
-                #tokenizzo le parole nel paragrafo (eliminando così i duplicati)
-                paragraph_tokens = set(re.findall(r"\b[a-zA-Z0-9\-]+\b", paragraph_text))
-
-                matched = keywords & paragraph_tokens
-            
-                if len(matched)>=min_matches:
-                    context_paragraphs.append(paragraph_title)
-        
-    if appendix:
-        for a in appendix:
-            app_title = " ".join(a.xpath("./*[starts-with(name(), 'h')][1]//text()")).strip()
-            app_text = " ".join(a.xpath(".//text()")).lower()
-
-            #tokenizzo le parole nel paragrafo (eliminando così i duplicati)
-            app_tokens = set(re.findall(r"\b[a-zA-Z0-9\-]+\b", app_text))
-
-            matched = keywords & app_tokens
-        
-            if len(matched)>=min_matches:
-                context_paragraphs.append(app_title)
-
 
     return context_paragraphs
+
 
 
 
@@ -125,37 +113,18 @@ def estrazione_mentions(tree, table_id):
 
     mentions_paragraphs = []
 
-    section = tree.xpath("//section[@class='ltx_section']")
-    appendix = tree.xpath("//section[@class='ltx_appendix']")
+    sections = tree.xpath("//section[.//h2[contains(@class,'pmc_sec_title')]]"
+                            "[not(.//section[contains(@class,'abstract')])]")
 
-    for s in section:
+    for s in sections:
 
         #prima analisi della sezione
-        section_title = " ".join(s.xpath("./*[starts-with(name(), 'h')]//text()")).strip()
-        mentions = s.xpath(f"./*[not(self::section)]//p[.//a[contains(@href, '#{table_id}')]]")
+        title = s.xpath("./h2")
+        mentions = s.xpath(f".//p[.//a[contains(@href, '#{table_id}')]]")
+
+        section_title = title[0].text_content().strip() if title else ""
         
         if mentions:
             mentions_paragraphs.append(section_title)
         
-       
-        #ora si analizzano i paragrafi di sezione (se ci sono)
-        paragraphs = s.xpath("./section")
-
-        if paragraphs:
-            for p in paragraphs:
-                paragraph_title = " ".join(p.xpath("./*[starts-with(name(), 'h')]//text()")).strip()
-                mentions = p.xpath(f".//p[.//a[contains(@href, '#{table_id}')]]")
-
-                if mentions:
-                    mentions_paragraphs.append(paragraph_title)
-        
-    if appendix:
-        for a in appendix:
-            app_title = " ".join(a.xpath("./*[starts-with(name(), 'h')][1]//text()")).strip()
-            mentions = a.xpath(f".//p[.//a[contains(@href, '#{table_id}')]]")
-
-            if mentions:
-                mentions_paragraphs.append(app_title)
-
-
     return mentions_paragraphs

@@ -16,11 +16,11 @@ def main():
     # fs.create_index()
     # fs.insert_documents()
 
-    # # Tables
-    # print("Inizializzazione Tabelle...")
-    # ts = TablesSearch() # Usiamo TablesSearch, non FigureSearch
-    # ts.create_index()
-    # ts.insert_documents()
+    # Tables
+    print("Inizializzazione Tabelle...")
+    ts = TablesSearch() # Usiamo TablesSearch, non FigureSearch
+    ts.create_index()
+    ts.insert_documents()
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from auxiliar_indexing_functions import estrazione_context_paragraphs
 from auxiliar_indexing_functions import estrazione_mentions
+from auxiliar_indexing_functions import estrazione_paper_id
 
 load_dotenv()
 
@@ -47,7 +48,7 @@ class TablesSearch:
         documents = []
         keyword_counts = []
 
-        html_path = os.path.join('.', 'articoli.html')
+        html_path = os.path.join('.', 'articoli_html')
 
         for file in os.listdir(html_path):
             if not file.endswith('.html'):
@@ -59,22 +60,14 @@ class TablesSearch:
 
                 tables = tree.xpath("//section[@class='tw xbox font-sm']")
 
-                base_hrefs = tree.xpath("//base/@href")
-                paper_id = (
-                    base_hrefs[0].strip("/").split("/")[-1]
-                    if base_hrefs
-                    else file.replace('.html', '')
-                )
+                #paper_id
+                paper_id = estrazione_paper_id(tree)
 
                 #table_id
                 for fig in tables:
                     table_id = fig.get("id", "NO_ID")
 
-                    caption = " ".join(
-                        c.strip()
-                        for c in fig.xpath("(./div[@class='caption'] | ./div[@class='caption p'] | ./*[1])//text()")
-                        if c.strip()
-                    )
+                    caption = " ".join(c.strip() for c in fig.xpath("(./div[@class='caption'] | ./div[@class='caption p'])//text()") if c.strip())
 
                     table_node = fig.xpath(".//div[contains(@class, 'tbl-box p')]/table")
                     if not table_node:
@@ -105,7 +98,7 @@ class TablesSearch:
 
                     documents.append({
                         '_index': self.index_name,
-                        '_id': f"{paper_id}::{table_id}",
+                        '_id': f"{table_id}",
                         '_source': {
                             'paper_id': paper_id,
                             'table_id': table_id,

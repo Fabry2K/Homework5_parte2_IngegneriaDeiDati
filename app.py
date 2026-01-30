@@ -174,32 +174,32 @@ def get_document(id):
 #         figure=figure
 #     )
 
-# # =========================
-# # TABLE VIEW
-# # =========================
+# =========================
+# TABLE VIEW
+# =========================
 
-# @app.get('/table/<id>')
-# def get_table(id):
-#     response = table_client.es.get(
-#         index=table_client.index_name,
-#         id=id
-#     )
+@app.get('/table/<id>')
+def get_table(id):
+    response = table_client.es.get(
+        index=table_client.index_name,
+        id=id
+    )
 
-#     doc = response['_source']
+    doc = response['_source']
 
-#     table = {
-#         "table_id": id,
-#         "paper_id": doc.get("paper_id"),
-#         "caption": doc.get("caption", ""),
-#         "table_html": doc.get("table_html", ""),
-#         "mentions": doc.get("mentions", []),
-#         "context_paragraphs": doc.get("context_paragraphs", [])
-#     }
+    table = {
+        "table_id": id,
+        "paper_id": doc.get("paper_id"),
+        "caption": doc.get("caption", ""),
+        "table_html": doc.get("table_html", ""),
+        "mentions": doc.get("mentions", []),
+        "context_paragraphs": doc.get("context_paragraphs", [])
+    }
 
-#     return render_template(
-#         'table.html',
-#         table=table
-#     )
+    return render_template(
+        'table.html',
+        table=table
+    )
 
 # =========================
 # MAIN
