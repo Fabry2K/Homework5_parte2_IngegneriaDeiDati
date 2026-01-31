@@ -2,6 +2,9 @@ import os
 import re
 from lxml import html
 from urllib.parse import urljoin
+
+from auxiliar_indexing_functions import estrazione_mentions
+
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 
@@ -29,11 +32,10 @@ class FigureSearch:
             'mappings': {
                 'properties': {
                     'paper_id': {'type': 'keyword'},
+                    'fig_id': {'type': 'keyword'},
                     'url': {'type': 'keyword'},
                     'caption': {'type': 'text'},
-                    'caption_html': {'type': 'text'},
-                    'citing_paragraphs': {'type': 'text'},
-                    'citing_paragraphs_html': {'type': 'text'}
+                    'mention': {'type': 'text'}
                 }
             }
         })
@@ -44,7 +46,7 @@ class FigureSearch:
 
     def docs(self):
         documents = []
-        html_path = os.path.join('.', 'arxiv_html_papers')
+        html_path = os.path.join('.', 'articoli_html')
 
         for file in os.listdir(html_path):
             if not file.endswith('.html'):
@@ -55,57 +57,46 @@ class FigureSearch:
 
             with open(full_path, 'r', encoding='utf-8') as f:
                 tree = html.fromstring(f.read())
-                figures = tree.xpath("//figure")
 
-                article_base_url = f"https://arxiv.org/html/{paper_id}/"
+                figures = tree.xpath("//figure")
                 paragraphs = [p for p in tree.xpath("//p") if p.text_content().strip()]
 
                 for fig in figures:
-                    # Estrai caption
+
+                    # Estrazione caption
                     caption_list = fig.xpath(".//figcaption//text()")
                     caption = " ".join(c.strip() for c in caption_list if c.strip())
+
+                    #Parole chiave caption
+                    keywords = set(caption.split())
 
                     if not caption:
                         continue
 
-                    # Escludi tabelle e algoritmi
-                    if re.match(r'^(TABLE|Table|ALGORITHM|Algorithm)\b', caption):
-                        continue
+                    # # Escludi tabelle e algoritmi
+                    # if re.match(r'^(TABLE|Table|ALGORITHM|Algorithm)\b', caption):
+                    #     continue
 
                     # URL immagine
-                    img_src = fig.xpath(".//img/@src")
-                    url = urljoin(article_base_url, img_src[0]) if img_src else None
+                    url_list = fig.xpath(".//img/@src")
+                    url = url_list[0] if url_list else None
 
                     # Estrai numero figura (se presente)
-                    figure_number = None
-                    m = re.search(r'Figure\s*(\d+)', caption, re.I)
+                    fig_id = None
+                    m = fig.get('id', 'NO_ID')
                     if m:
-                        figure_number = m.group(1)
+                        fig_id = m
 
-                    citing_paragraphs = []
-                    citing_paragraphs_html = []
-
-                    for p in paragraphs:
-                        p_text = p.text_content().strip()
-
-                        if (
-                            (figure_number and f'Figure {figure_number}' in p_text) or
-                            (figure_number and f'Fig. {figure_number}' in p_text)
-                        ):
-                            citing_paragraphs.append(p_text)
-                            citing_paragraphs_html.append(
-                                html.tostring(p, encoding='unicode', method='html')
-                            )
+                    mention = estrazione_mentions(tree, fig_id)
 
                     documents.append({
                         '_index': self.index_name,
                         '_source': {
                             'paper_id': paper_id,
+                            'fig_id': fig_id,
                             'url': url,
                             'caption': caption,
-                            'caption_html': html.tostring(fig, encoding='unicode', method='html'),
-                            'citing_paragraphs': citing_paragraphs,
-                            'citing_paragraphs_html': citing_paragraphs_html
+                            'mention': mention
                         }
                     })
 

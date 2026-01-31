@@ -150,29 +150,29 @@ def get_document(id):
     )
 
 
-# # =========================
-# # FIGURE VIEW
-# # =========================
+# =========================
+# FIGURE VIEW
+# =========================
 
-# @app.get('/figure/<id>')
-# def get_figure(id):
-#     doc = figure_client.es.get(
-#         index=figure_client.index_name,
-#         id=id
-#     )['_source']
+@app.get('/figure/<id>')
+def get_figure(id):
+    doc = figure_client.es.get(
+        index=figure_client.index_name,
+        id=id
+    )['_source']
 
-#     figure = {
-#         "figure_id": id,
-#         "paper_id": doc.get("paper_id"),
-#         "url": doc.get("url"),
-#         "caption": doc.get("caption", ""),
-#         "citing_paragraphs": doc.get("citing_paragraphs", [])
-#     }
+    figure = {
+        "figure_id": id,
+        "paper_id": doc.get("paper_id"),
+        "url": doc.get("url"),
+        "caption": doc.get("caption", ""),
+        "citing_paragraphs": doc.get("citing_paragraphs", [])
+    }
 
-#     return render_template(
-#         'figure.html',
-#         figure=figure
-#     )
+    return render_template(
+        'figure.html',
+        figure=figure
+    )
 
 # =========================
 # TABLE VIEW

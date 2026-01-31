@@ -113,7 +113,7 @@
             </p>
 
           {% elif index_type == 'figures' %}
-            <h5><a href="{{ url_for('get_figure', id=result._id) }}">Figure: {{ result._source.url }}</a></h5>
+            <h5><a href="{{ url_for('get_figure', id=result._id) }}">Figure: {{ result._source.fig_id }}</a></h5>
             <p class="mb-1 small"><strong>Paper:</strong> {{ result._source.paper_id }}</p>
             <p class="mb-1 small">
               <strong>Caption Preview:</strong> 

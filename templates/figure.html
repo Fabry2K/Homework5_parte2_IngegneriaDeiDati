@@ -20,15 +20,20 @@
   <hr>
 
   <h4>Caption</h4>
-  <p>{{ figure.caption | safe }}</p>
+  {% if figure.caption %}
+    <p>{{ figure.caption | safe }}</p>
+  {% else %}
+    <p class="text-muted">No caption found.</p>
+  {% endif %}
+  
 
-  <h4>Citing Paragraphs</h4>
-  {% if figure.citing_paragraphs %}
+  <h4>Mentions</h4>
+  {% if figure.mention %}
     {% for p in figure.citing_paragraphs %}
       <p>{{ p | safe }}</p>
     {% endfor %}
   {% else %}
-    <p class="text-muted">No citing paragraphs found.</p>
+    <p class="text-muted">No mentions found.</p>
   {% endif %}
 </div>
 {% endblock %}

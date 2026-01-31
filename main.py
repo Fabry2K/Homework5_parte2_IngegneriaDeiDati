@@ -10,11 +10,11 @@ def main():
     s.create_index()
     s.insert_documents()
 
-    # # Figures
-    # print("Inizializzazione Figure...")
-    # fs = FigureSearch()
-    # fs.create_index()
-    # fs.insert_documents()
+    # Figures
+    print("Inizializzazione Figure...")
+    fs = FigureSearch()
+    fs.create_index()
+    fs.insert_documents()
 
     # Tables
     print("Inizializzazione Tabelle...")
