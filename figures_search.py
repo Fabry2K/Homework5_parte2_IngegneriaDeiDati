@@ -1,9 +1,8 @@
 import os
-import re
 from lxml import html
-from urllib.parse import urljoin
 
 from auxiliar_indexing_functions import estrazione_mentions
+from auxiliar_indexing_functions import estrazione_paper_id
 
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
@@ -52,14 +51,13 @@ class FigureSearch:
             if not file.endswith('.html'):
                 continue
 
-            paper_id = file.replace('.html', '')
+            paper_id = estrazione_paper_id(tree)
             full_path = os.path.join(html_path, file)
 
             with open(full_path, 'r', encoding='utf-8') as f:
                 tree = html.fromstring(f.read())
 
                 figures = tree.xpath("//figure")
-                paragraphs = [p for p in tree.xpath("//p") if p.text_content().strip()]
 
                 for fig in figures:
 
@@ -67,15 +65,8 @@ class FigureSearch:
                     caption_list = fig.xpath(".//figcaption//text()")
                     caption = " ".join(c.strip() for c in caption_list if c.strip())
 
-                    #Parole chiave caption
-                    keywords = set(caption.split())
-
                     if not caption:
                         continue
-
-                    # # Escludi tabelle e algoritmi
-                    # if re.match(r'^(TABLE|Table|ALGORITHM|Algorithm)\b', caption):
-                    #     continue
 
                     # URL immagine
                     url_list = fig.xpath(".//img/@src")
