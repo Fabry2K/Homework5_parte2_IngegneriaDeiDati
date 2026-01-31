@@ -149,24 +149,26 @@ def get_document(id):
         testo=doc['_source']['testo']
     )
 
-
 # =========================
 # FIGURE VIEW
 # =========================
 
 @app.get('/figure/<id>')
 def get_figure(id):
-    doc = figure_client.es.get(
+    response = figure_client.es.get(
         index=figure_client.index_name,
         id=id
-    )['_source']
+    )
+
+    doc = response['_source']
 
     figure = {
-        "figure_id": id,
+        "es_id": id,                     # ID Elasticsearch
+        "figure_id": doc.get("fig_id"),  # ✅ ID della figura
         "paper_id": doc.get("paper_id"),
         "url": doc.get("url"),
         "caption": doc.get("caption", ""),
-        "citing_paragraphs": doc.get("citing_paragraphs", [])
+        "mentions": doc.get("mention", [])
     }
 
     return render_template(

@@ -9,7 +9,11 @@
   </p>
 
   <h2>Figure</h2>
+
   <p><b>Paper ID:</b> {{ figure.paper_id }}</p>
+  <p><b>Figure ID:</b> {{ figure.figure_id }}</p>
+  <p class="text-muted small"><b>Elasticsearch ID:</b> {{ figure.es_id }}</p>
+
   <p>
     <b>URL / Reference:</b>
     <a href="{{ figure.url }}" target="_blank" rel="noopener noreferrer">
@@ -25,11 +29,10 @@
   {% else %}
     <p class="text-muted">No caption found.</p>
   {% endif %}
-  
 
   <h4>Mentions</h4>
-  {% if figure.mention %}
-    {% for p in figure.citing_paragraphs %}
+  {% if figure.mentions %}
+    {% for p in figure.mentions %}
       <p>{{ p | safe }}</p>
     {% endfor %}
   {% else %}
