@@ -51,11 +51,12 @@ class FigureSearch:
             if not file.endswith('.html'):
                 continue
 
-            paper_id = estrazione_paper_id(tree)
             full_path = os.path.join(html_path, file)
 
             with open(full_path, 'r', encoding='utf-8') as f:
                 tree = html.fromstring(f.read())
+                
+                paper_id = estrazione_paper_id(tree)
 
                 figures = tree.xpath("//figure")
 
