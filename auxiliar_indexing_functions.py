@@ -82,7 +82,7 @@ def estrazione_context_paragraphs(tree, keywords):
 
     for s in sections:
 
-        min_matches = max(1, len(keywords) // 7)
+        min_matches = max(1, len(keywords) // 6)
 
         title = s.xpath("./h2")
         text = s.xpath(".//p")

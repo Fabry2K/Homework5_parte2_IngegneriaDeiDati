@@ -164,7 +164,7 @@ def get_figure(id):
 
     figure = {
         "es_id": id,                     # ID Elasticsearch
-        "figure_id": doc.get("fig_id"),  # ✅ ID della figura
+        "figure_id": doc.get("fig_id"),  # ID della figura
         "paper_id": doc.get("paper_id"),
         "url": doc.get("url"),
         "caption": doc.get("caption", ""),
